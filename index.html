@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>orger.com — Проверка доменов</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .tab-active { border-bottom: 2px solid #2563eb; color: #2563eb; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+
+    <!-- Шапка сайта -->
+    <header class="bg-white border-b sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="showTab('check')">
+                <span class="text-2xl font-bold tracking-tight text-blue-600">orger.com</span>
+            </div>
+            <nav class="flex gap-6 h-full">
+                <button onclick="showTab('check')" id="btn-check" class="tab-active font-medium px-2 transition-colors hover:text-blue-600">Проверить</button>
+                <button onclick="showTab('buy')" id="btn-buy" class="font-medium px-2 transition-colors text-slate-500 hover:text-blue-600">Купить домен</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-12">
+        
+        <!-- Вкладка: Проверка домена -->
+        <section id="tab-check-content">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold mb-4">Узнайте всё о домене</h1>
+                <p class="text-slate-500 text-lg">Проверьте дату создания и страну регистрации любого адреса.</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border mb-8">
+                <form onsubmit="handleCheck(event)" class="flex flex-col md:flex-row gap-3">
+                    <input 
+                        type="text" 
+                        id="domain-input"
+                        placeholder="Введите домен (например, google.com)" 
+                        class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                        required
+                    >
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-xl transition-all shadow-md active:scale-95">
+                        Проверить
+                    </button>
+                </form>
+                <p id="error-msg" class="text-red-500 mt-3 text-sm hidden"></p>
+            </div>
+
+            <!-- Загрузка -->
+            <div id="loader" class="hidden flex flex-col items-center py-10">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+                <p class="mt-4 text-slate-500">Запрос к базе WHOIS...</p>
+            </div>
+
+            <!-- Результат -->
+            <div id="result-card" class="hidden bg-white rounded-2xl shadow-lg border overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div class="bg-blue-600 px-6 py-4">
+                    <h3 id="res-domain" class="text-white font-bold text-xl uppercase tracking-wider">DOMAIN.COM</h3>
+                </div>
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex items-start gap-4">
+                        <div class="bg-blue-50 p-3 rounded-lg text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 uppercase font-bold tracking-widest">Дата создания</p>
+                            <p id="res-date" class="text-lg font-semibold text-slate-800">01.01.2000</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="bg-blue-50 p-3 rounded-lg text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 uppercase font-bold tracking-widest">Страна регистрации</p>
+                            <p id="res-country" class="text-lg font-semibold text-slate-800">США</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Вкладка: Купить домен -->
+        <section id="tab-buy-content" class="hidden text-center py-20">
+            <div class="bg-white border-2 border-dashed border-slate-200 rounded-3xl p-12">
+                <div class="bg-slate-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Наши предложения</h2>
+                <p class="text-slate-500 text-lg">Тут пока пусто</p>
+                <button onclick="showTab('check')" class="mt-8 text-blue-600 font-semibold hover:underline">Вернуться к поиску</button>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const countries = ["США", "Германия", "Нидерланды", "Россия", "Канада", "Франция", "Япония", "Великобритания", "Китай"];
+
+        function showTab(tab) {
+            const checkContent = document.getElementById('tab-check-content');
+            const buyContent = document.getElementById('tab-buy-content');
+            const btnCheck = document.getElementById('btn-check');
+            const btnBuy = document.getElementById('btn-buy');
+
+            if (tab === 'check') {
+                checkContent.classList.remove('hidden');
+                buyContent.classList.add('hidden');
+                btnCheck.classList.add('tab-active', 'text-blue-600');
+                btnCheck.classList.remove('text-slate-500');
+                btnBuy.classList.remove('tab-active', 'text-blue-600');
+                btnBuy.classList.add('text-slate-500');
+            } else {
+                checkContent.classList.add('hidden');
+                buyContent.classList.remove('hidden');
+                btnBuy.classList.add('tab-active', 'text-blue-600');
+                btnBuy.classList.remove('text-slate-500');
+                btnCheck.classList.remove('tab-active', 'text-blue-600');
+                btnCheck.classList.add('text-slate-500');
+            }
+        }
+
+        function handleCheck(event) {
+            event.preventDefault();
+            const input = document.getElementById('domain-input');
+            const errorMsg = document.getElementById('error-msg');
+            const loader = document.getElementById('loader');
+            const resultCard = document.getElementById('result-card');
+            
+            const domain = input.value.trim();
+            const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+
+            if (!domainRegex.test(domain)) {
+                errorMsg.innerText = "Пожалуйста, введите корректный домен (напр. example.com)";
+                errorMsg.classList.remove('hidden');
+                resultCard.classList.add('hidden');
+                return;
+            }
+
+            errorMsg.classList.add('hidden');
+            resultCard.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            // Имитация задержки сети
+            setTimeout(() => {
+                const randomYear = Math.floor(Math.random() * (2024 - 1995 + 1)) + 1995;
+                const randomMonth = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
+                const randomDay = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
+                const randomCountry = countries[Math.floor(Math.random() * countries.length)];
+
+                document.getElementById('res-domain').innerText = domain;
+                document.getElementById('res-date').innerText = `${randomDay}.${randomMonth}.${randomYear}`;
+                document.getElementById('res-country').innerText = randomCountry;
+
+                loader.classList.add('hidden');
+                resultCard.classList.remove('hidden');
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
